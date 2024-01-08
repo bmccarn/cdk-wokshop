@@ -3,6 +3,8 @@
 *.d.ts
 node_modules
 !lambda/*.js
+package-lock.json
+package.json
 
 # CDK asset staging directory
 .cdk.staging
