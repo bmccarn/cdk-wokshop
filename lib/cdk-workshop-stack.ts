@@ -4,6 +4,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigw from 'aws-cdk-lib/aws-apigateway';
 import { HitCounter } from './hitcounter';
 import { TableViewer } from 'cdk-dynamo-table-viewer';
+import { Dashboard, Metric, GraphWidget } from 'aws-cdk-lib/aws-cloudwatch';
 
 export class CdkWorkshopStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -28,6 +29,35 @@ export class CdkWorkshopStack extends Stack {
       title: 'Hello Hits',
       table: helloWithCounter.table
     });
+
+    // Create a CloudWatch Dashboard
+    const dashboard = new Dashboard(this, 'Dashboard', {
+      dashboardName: 'MyCDKAppDashboard' 
+    });
+
+    // Create a Metric for Lambda Invocations
+    const lambdaInvocationsMetric = new Metric({
+      metricName: 'Invocations',
+      namespace: 'AWS/Lambda',
+      dimensionsMap: {
+        FunctionName: hello.functionName,
+      },
+      statistic: 'Sum',
+      // You can specify other properties like 'period', 'statistic', etc., if needed
+    });
+
+    // Create a GraphWidget for the Metric
+    const lambdaInvocationsWidget = new GraphWidget({
+      title: "Lambda Invocations",
+      width: 6,
+      height: 6,
+      left: [lambdaInvocationsMetric],
+      // You can add more configuration to the widget as needed
+    });
+
+    // Add the Widget to the Dashboard
+    dashboard.addWidgets(lambdaInvocationsWidget);
+    
 
   }
 }
